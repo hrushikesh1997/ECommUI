@@ -19,6 +19,7 @@ export class CartService {
     //Check if we already have the item in our cart
     let alreadyExsist : boolean = false;
     let existingCartItem : CartItem = undefined;
+
     //find the item in the cart based on item id
     if(this.cartItems.length > 0){
       for(let cartItem of this.cartItems){
@@ -36,7 +37,7 @@ export class CartService {
     else{
       this.cartItems.push(theCartItem);
     }
-
+    this.computeCartTotals();
   }
   computeCartTotals(){
     let totalPrice:number = 0;
@@ -48,13 +49,22 @@ export class CartService {
     //Publishing Events
     this.totalPrice.next(totalPrice);
     this.totalQuantity.next(totalQuantity);
-    this.logCart(totalPrice,totalQuantity)
   }
 
-  logCart(totalPrice:number, totalQ:number){
-    for(let cartitem of this.cartItems){
-      console.log(cartitem.id+" "+(cartitem.unitPrice * cartitem.quantity) +" "+cartitem.quantity)
+  decrementQty(cartItem: CartItem) {
+    cartItem.quantity--;
+    if(cartItem.quantity === 0){
+      this.removeCartItem(cartItem);
     }
-    console.log("Totals:&&&&&&&&&&&&&&&&&&&&&& "+totalPrice+" "+totalQ);
+    else{
+      this.computeCartTotals();
+    }
+  }
+  removeCartItem(cartItem: CartItem) {
+    const itemIdx = this.cartItems.findIndex( item => item.id === cartItem.id);
+    if(itemIdx > -1){
+      this.cartItems.splice(itemIdx,1);
+      this.computeCartTotals();
+    }
   }
 }
